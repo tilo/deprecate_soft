@@ -8,12 +8,15 @@ Gem::Specification.new do |spec|
   spec.authors = ["Tilo Sloboda"]
   spec.email = ["tilo.sloboda@gmail.com"]
 
-  spec.summary     = "Soft deprecation wrapper for Ruby methods with customizable tracking hooks"
+  spec.summary     = "Gracefully deprecate and safely delete Ruby methods from your code"
   spec.description = <<~DESC
-    DeprecateSoft is a lightweight Ruby gem that lets you softly deprecate methods
+    DeprecateSoft is a lightweight Ruby gem that lets you gracefully deprecate methods
     in your codebase without breaking functionality. It wraps existing instance or
     class methods and lets you plug in custom before/after hooks for tracking usage
     via logging, Redis, DataDog, or any other observability tools.
+
+    Once you verify in your tracking that a method is no longer called,
+    you can remove it safely from your code base.
 
     This is especially useful in large codebases where you want to safely remove
     legacy methods, but first need insight into whether and where they're still
