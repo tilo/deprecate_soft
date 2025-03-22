@@ -174,7 +174,6 @@ config.before_hook = ->(method, message, args:) {
 
 ## 🧰 Limitations / Notes
 
-- Only works for instance methods (for now). Let us know if you want class method support.
 - Make sure hooks do not raise or interfere with production behavior.
 - Currently assumes Ruby 2.5+ (for `&.` and keyword args support).
 
