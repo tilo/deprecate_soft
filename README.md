@@ -249,7 +249,7 @@ config.before_hook = lambda do |method, message, args:|
 end
 ```
 
-If Klass#legacy_method is called from app/services/foo.rb:42:
+If `Klass#legacy_method` is called from `app/services/foo.rb:42`, and `app/jobs/cleanup_job.rb:88`, you get:
 
 ```
 Klass#legacy_method → 7
@@ -257,7 +257,8 @@ Klass#legacy_method:caller:app/services/foo.rb:42 → 3
 Klass#legacy_method:caller:app/jobs/cleanup_job.rb:88 → 4
 ```
 
-Now you not only know that the method is still used -- you know where from, and how often -- so you can fix your code.
+💡 Now you not only know that the method is still used -- you know where from, and how often -- so you can fix your code.
+
 ---
 
 ## 🛡 Best Practices
