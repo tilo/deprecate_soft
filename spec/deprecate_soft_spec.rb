@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "spec_helper"
-require "deprecate_soft"
+require 'spec_helper'
+require 'deprecate_soft'
 
 RSpec.describe DeprecateSoft do
   before do
@@ -9,11 +9,11 @@ RSpec.describe DeprecateSoft do
     DeprecateSoft.after_hook = nil
   end
 
-  it "has a version number" do
+  it 'has a version number' do
     expect(DeprecateSoft::VERSION).not_to be nil
   end
 
-  describe "instance method deprecation" do
+  describe 'instance method deprecation' do
     let(:klass) do
       Class.new do
         include DeprecateSoft
@@ -22,52 +22,52 @@ RSpec.describe DeprecateSoft do
           "Hello, #{name}"
         end
 
-        deprecate_soft :hello, "Use #greet instead"
+        deprecate_soft :hello, 'Use #greet instead'
       end
     end
 
-    it "returns the original result" do
-      expect(klass.new.hello("world")).to eq("Hello, world")
+    it 'returns the original result' do
+      expect(klass.new.hello('world')).to eq('Hello, world')
     end
 
-    it "does not raise if before_hook is nil" do
+    it 'does not raise if before_hook is nil' do
       DeprecateSoft.before_hook = nil
-      expect { klass.new.hello("world") }.not_to raise_error
+      expect { klass.new.hello('world') }.not_to raise_error
     end
 
-    it "calls before_hook if defined" do
+    it 'calls before_hook if defined' do
       called = nil
       DeprecateSoft.before_hook = lambda do |method, message, args:|
         called = [method, message, args]
       end
 
-      klass.new.hello("foo")
+      klass.new.hello('foo')
 
       expect(called[0]).to match(/#hello/)
-      expect(called[1]).to eq("Use #greet instead")
-      expect(called[2]).to eq(["foo"])
+      expect(called[1]).to eq('Use #greet instead')
+      expect(called[2]).to eq(['foo'])
     end
 
-    it "does not raise if after_hook is nil" do
+    it 'does not raise if after_hook is nil' do
       DeprecateSoft.after_hook = nil
-      expect { klass.new.hello("world") }.not_to raise_error
+      expect { klass.new.hello('world') }.not_to raise_error
     end
 
-    it "calls after_hook if defined" do
+    it 'calls after_hook if defined' do
       called = nil
       DeprecateSoft.after_hook = lambda do |method, message, result:|
         called = [method, message, result]
       end
 
-      result = klass.new.hello("bar")
+      klass.new.hello('bar')
 
       expect(called[0]).to match(/#hello/)
-      expect(called[1]).to eq("Use #greet instead")
-      expect(called[2]).to eq("Hello, bar")
+      expect(called[1]).to eq('Use #greet instead')
+      expect(called[2]).to eq('Hello, bar')
     end
   end
 
-  describe "class method deprecation" do
+  describe 'class method deprecation' do
     let(:klass) do
       Class.new do
         extend DeprecateSoft
@@ -76,48 +76,48 @@ RSpec.describe DeprecateSoft do
           "Hi, #{name}"
         end
 
-        deprecate_soft :hello, "Use .greet instead"
+        deprecate_soft :hello, 'Use .greet instead'
       end
     end
 
-    it "returns the original result" do
-      expect(klass.hello("Alice")).to eq("Hi, Alice")
+    it 'returns the original result' do
+      expect(klass.hello('Alice')).to eq('Hi, Alice')
     end
 
-    it "does not raise for class method if before_hook is nil" do
+    it 'does not raise for class method if before_hook is nil' do
       DeprecateSoft.before_hook = nil
-      expect { klass.hello("admin") }.not_to raise_error
+      expect { klass.hello('admin') }.not_to raise_error
     end
 
-    it "calls before_hook if defined" do
+    it 'calls before_hook if defined' do
       called = nil
       DeprecateSoft.before_hook = lambda do |method, message, args:|
         called = [method, message, args]
       end
 
-      klass.hello("Bob")
+      klass.hello('Bob')
 
       expect(called[0]).to match(/\.hello/)
-      expect(called[1]).to eq("Use .greet instead")
-      expect(called[2]).to eq(["Bob"])
+      expect(called[1]).to eq('Use .greet instead')
+      expect(called[2]).to eq(['Bob'])
     end
 
-    it "does not raise for class method if before_hook is nil" do
+    it 'does not raise for class method if before_hook is nil' do
       DeprecateSoft.before_hook = nil
-      expect { klass.hello("admin") }.not_to raise_error
+      expect { klass.hello('admin') }.not_to raise_error
     end
 
-    it "calls after_hook if defined" do
+    it 'calls after_hook if defined' do
       called = nil
       DeprecateSoft.after_hook = lambda do |method, message, result:|
         called = [method, message, result]
       end
 
-      result = klass.hello("Zoe")
+      klass.hello('Zoe')
 
       expect(called[0]).to match(/\.hello/)
-      expect(called[1]).to eq("Use .greet instead")
-      expect(called[2]).to eq("Hi, Zoe")
+      expect(called[1]).to eq('Use .greet instead')
+      expect(called[2]).to eq('Hi, Zoe')
     end
   end
 end

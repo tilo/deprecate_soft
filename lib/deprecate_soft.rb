@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "deprecate_soft/version"
+require_relative 'deprecate_soft/version'
 
 module DeprecateSoft
   class << self
@@ -12,7 +12,7 @@ module DeprecateSoft
     end
 
     def suffix
-      @suffix || "deprecated"
+      @suffix || 'deprecated'
     end
 
     def hidden_method_name(method_name)

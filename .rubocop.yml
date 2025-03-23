@@ -1,8 +1,26 @@
 AllCops:
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 2.5 # purposely an old Ruby version
 
 Style/StringLiterals:
-  EnforcedStyle: double_quotes
+  EnforcedStyle: single_quotes
 
 Style/StringLiteralsInInterpolation:
-  EnforcedStyle: double_quotes
+  EnforcedStyle: single_quotes
+
+Metrics/BlockLength:
+  Enabled: false
+
+Lint/UnusedBlockArgument:
+  Enabled: false
+
+Naming/MethodParameterName:
+  Enabled: false
+
+Style/SafeNavigation:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/RedundantSelf:
+  Enabled: false

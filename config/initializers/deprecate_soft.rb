@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "deprecate_soft"
+require 'deprecate_soft'
 
 # Optional: set up your tracking solution
 
