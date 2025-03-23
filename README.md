@@ -176,7 +176,7 @@ config.before_hook = ->(method, message, args:) {
 ## 🧰 Limitations / Notes
 
 - Make sure hooks do not raise or interfere with production behavior.
-  -> Only use non-blocking, low-latency methods for tracking!
+- Only use non-blocking, low-latency methods for tracking!
 - Currently assumes Ruby 2.5+ (for `&.` and keyword args support).
 - Currently keeps the visibility of the renamed original method the same (does not make it private).
 
