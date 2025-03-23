@@ -182,7 +182,7 @@ MyService.legacy_method(1, 2) # will exercise the tracking hooks
 
 When you call `deprecate_soft :method_name, "reason"`:
 
-1. It renames the original method to `__method_name_original`.
+1. It renames the original method to `__method_name_deprecated`.
 2. It defines a new method with the original name that:
    - Calls the configured `before_hook` (if set)
    - Delegates to the original method
