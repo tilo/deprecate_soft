@@ -5,9 +5,9 @@ DeprecateSoft is a lightweight and flexible Ruby gem designed to help you gracef
 
 It was inspired by the need to track deprecated method usage in large codebases before safely removing old code — with zero disruption and flexible metrics support.
 
-This gem lets you wrap existing methods with before and after hooks to track usage patterns without changing the method's behavior.
+This gem lets you wrap existing methods with before and after hooks to track usage patterns without changing the method's behavior, and without any impact on production systems.
 
-It’s ideal for monitoring deprecated method usage across your application using non-blocking, low-latency tools such as Redis, DataDog, or logs.
+It’s ideal for monitoring deprecated method usage across your application using non-blocking, low-latency tools such as Redis, DataDog, Prometheus, or logs.
 
 Once tracking confirms that a deprecated method is no longer in use, you can confidently delete it from your codebase.
 
@@ -45,43 +45,98 @@ bundle install
 Create an initializer in your Rails app (or load manually in a non-Rails project):
 
 ```ruby
-# config/initializers/deprecate_soft.rb
-
 require "deprecate_soft"
 
-# Optional: require Redis or DataDog as needed
-# require "redis"  # https://github.com/redis/redis-rb
-# require "datadog/statsd"  # https://github.com/DataDog/dogstatsd-ruby
+# require 'datadog/statsd'
+
+# require 'redis'
+# $redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
 
 module DeprecateSoft
-  # Optional: scoped setup (not global!)
+  # Optional: customize how the original method is renamed internally
+  #
+  # For example, if you deprecate `foo`, this affects what the internal
+  # renamed method will be called. These names should be unlikely to conflict.
+  #
+  # Default is "__" and "deprecated", which becomes: "__foo_deprecated"
+  # config.prefix = "__"
+  # config.suffix = "deprecated"
+
+  # Optional: set up your tracking solution
   #
   # redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
   # statsd = Datadog::Statsd.new
 
-  configure do |config|
-    config.before_hook = lambda do |method, message, args:|
-      # Log
-      # Rails.logger.warn "DEPRECATED: #{method} : #{message}"
+  # Required: define a before_hook to track method usage
+  #
+  # You can use Redis, StatsD, DataDog, Prometheus, etc.
+  config.before_hook = lambda do |method, message, args:|
+    # Track via Redis:
+    # redis_key = "deprecate_soft:#{method.gsub('#', ':')}"
+    # redis.incr("#{redis_key}")
+    # or:
+    # redis.incr("#{redis_key}:#{Date.today.cweek}") # weekly count
 
-      # Redis example:
-      # redis_key = "deprecate_soft:#{method.gsub('#', ':')}"
-      # redis.incr("#{redis_key}:#{Date.today}")
+    # Track via DataDog (StatsD):
+    # metric_name = "deprecate_soft.#{method.tr('#', '.').downcase}"
+    # statsd.increment(metric_name)
 
-      # DataDog example:
-      # metric_name = "deprecate_soft.#{method.tr('#', '.').downcase}"
-      # statsd.increment(metric_name)
-    end
-
-    # Optional after hook
-    # config.after_hook = lambda do |method, message, result:|
-    #   puts "Deprecated method #{method} finished execution"
-    # end
+    # Or just log it:
+    # Rails.logger.warn "DEPRECATED: #{method} – #{message}"
   end
+
+  # Optional: define an after_hook for additional metrics/logging
+  #
+  # config.after_hook = lambda do |method, message, result:|
+  #   # Optional: Logging or more metrics
+  #   puts "[DD] #{method} completed after deprecated call"
+  # end
 end
 ```
 
 This setup ensures you can plug in **any tracking backend** you like — without polluting the global namespace.
+
+### 🔧 Customizing Method Name Wrapping
+
+When `deprecate_soft` wraps a method, it renames the original method internally to preserve its behavior. You can customize how that internal method is named by configuring a `prefix` and `suffix`.
+
+By default, the original method:
+
+```ruby
+def foo
+end
+
+deprecate_soft :foo, "Use #bar instead"
+```
+
+...will be renamed to:
+
+```ruby
+__foo_deprecated
+```
+
+You can change the naming convention:
+
+```ruby
+DeprecateSoft.configure do |config|
+  config.prefix = "legacy_"   # or "" to disable
+  config.suffix = "old"       # or nil to disable
+end
+```
+
+This gives you full control over how deprecated methods are renamed internally.
+
+#### 📝 Naming Examples
+
+| Prefix      | Suffix       | Method Name   | Hidden Method Name        |
+|-------------|--------------|---------------|----------------------------|
+| `"__"`      | `"deprecated"` | `foo`         | `__foo_deprecated`        |
+| `""`        | `"old"`        | `foo`         | `foo_old`                 |
+| `"legacy_"` | `""`           | `foo`         | `legacy_foo`              |
+| `"_"`       | `"__"`         | `foo`         | `_foo__`                  |
+
+These names are never called directly — they're used internally to wrap and preserve the original method logic.
+
 
 ---
 
