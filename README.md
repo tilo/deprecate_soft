@@ -45,28 +45,19 @@ bundle install
 Create an initializer in your Rails app (or load manually in a non-Rails project):
 
 ```ruby
+# frozen_string_literal: true
+
 require "deprecate_soft"
 
-# require 'datadog/statsd'
+# Optional: set up your tracking solution
 
 # require 'redis'
-# $redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
+# redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
 
-module DeprecateSoft
-  # Optional: customize how the original method is renamed internally
-  #
-  # For example, if you deprecate `foo`, this affects what the internal
-  # renamed method will be called. These names should be unlikely to conflict.
-  #
-  # Default is "__" and "deprecated", which becomes: "__foo_deprecated"
-  # config.prefix = "__"
-  # config.suffix = "deprecated"
+# require 'datadog/statsd'
+# statsd = Datadog::Statsd.new
 
-  # Optional: set up your tracking solution
-  #
-  # redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
-  # statsd = Datadog::Statsd.new
-
+DeprecateSoft.configure do |config|
   # Required: define a before_hook to track method usage
   #
   # You can use Redis, StatsD, DataDog, Prometheus, etc.
@@ -91,6 +82,15 @@ module DeprecateSoft
   #   # Optional: Logging or more metrics
   #   puts "[DD] #{method} completed after deprecated call"
   # end
+
+  # Optional: customize how the original method is renamed internally
+  #
+  # For example, if you deprecate `foo`, this affects what the internal
+  # renamed method will be called. These names should be unlikely to conflict.
+  #
+  # Default is "__" and "deprecated", which becomes: "__foo_deprecated"
+  # config.prefix = "__"
+  # config.suffix = "deprecated"
 end
 ```
 
@@ -231,21 +231,34 @@ You can also track callers, so you can identify where you still have to fix your
 ### Redis:
 
 ```ruby
-config.before_hook = lambda do |method, message, args:|
-  # Get the direct caller of the deprecated method
-  caller_info = caller_locations(1, 1).first
+# config/initializers/deprecate_soft.rb
 
-  caller_key = if caller_info
-    "#{caller_info.path}:#{caller_info.lineno}"
-  else
-    "unknown"
+require "deprecate_soft"
+require 'redis'
+
+# Configure your redis client instance
+redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
+
+DeprecateSoft.configure do |config|
+  config.before_hook = lambda do |method, message, args:|
+    # Get the direct caller of the deprecated method
+    caller_info = caller_locations(1, 1).first
+
+    caller_key = if caller_info
+      "#{caller_info.path}:#{caller_info.lineno}"
+    else
+      "unknown"
+    end
+
+    # Track a global usage counter
+    redis.incr("deprecate_soft:#{method}")
+
+    # Track usage by caller location
+    redis.incr("deprecate_soft:#{method}:caller:#{caller_key}")
+
+    # Log the usage by caller location
+    Rails.logger.info("Deprecated #{method} called from #{caller_key}")
   end
-
-  # Track a global usage counter
-  $redis.incr("deprecate_soft:#{method}")
-
-  # Track usage by caller location
-  $redis.incr("deprecate_soft:#{method}:caller:#{caller_key}")
 end
 ```
 

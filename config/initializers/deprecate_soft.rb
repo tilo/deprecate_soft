@@ -2,26 +2,15 @@
 
 require "deprecate_soft"
 
-# require 'datadog/statsd'
+# Optional: set up your tracking solution
 
 # require 'redis'
-# $redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
+# redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
 
-module DeprecateSoft
-  # Optional: customize how the original method is renamed internally
-  #
-  # For example, if you deprecate `foo`, this affects what the internal
-  # renamed method will be called. These names should be unlikely to conflict.
-  #
-  # Default is "__" and "deprecated", which becomes: "__foo_deprecated"
-  # config.prefix = "__"
-  # config.suffix = "deprecated"
+# require 'datadog/statsd'
+# statsd = Datadog::Statsd.new
 
-  # Optional: set up your tracking solution
-  #
-  # redis = Redis.new(url: ENV.fetch("REDIS_URL", "redis://localhost:6379/0"))
-  # statsd = Datadog::Statsd.new
-
+DeprecateSoft.configure do |config|
   # Required: define a before_hook to track method usage
   #
   # You can use Redis, StatsD, DataDog, Prometheus, etc.
@@ -46,4 +35,13 @@ module DeprecateSoft
   #   # Optional: Logging or more metrics
   #   puts "[DD] #{method} completed after deprecated call"
   # end
+
+  # Optional: customize how the original method is renamed internally
+  #
+  # For example, if you deprecate `foo`, this affects what the internal
+  # renamed method will be called. These names should be unlikely to conflict.
+  #
+  # Default is "__" and "deprecated", which becomes: "__foo_deprecated"
+  # config.prefix = "__"
+  # config.suffix = "deprecated"
 end
