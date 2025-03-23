@@ -1,11 +1,15 @@
 
 # DeprecateSoft
 
-**DeprecateSoft** is a light-weight and flexible Ruby gem that helps you gracefully and safely deprecate methods. 
+DeprecateSoft is a lightweight and flexible Ruby gem designed to help you gracefully and safely deprecate methods.
 
-Instead of immediately removing or raising on deprecated methods, this gem allows you to wrap existing methods with before/after hooks — ideal for tracking usage across your application via logs, Redis, DataDog, or any other tool.
+It was inspired by the need to track deprecated method usage in large codebases before safely removing old code — with zero disruption and flexible metrics support.
 
-Once you verify in the tracking that the method is no longer used, you can safely delete it from your code.
+This gem lets you wrap existing methods with before and after hooks to track usage patterns without changing the method's behavior.
+
+It’s ideal for monitoring deprecated method usage across your application using non-blocking, low-latency tools such as Redis, DataDog, or logs.
+
+Once tracking confirms that a deprecated method is no longer in use, you can confidently delete it from your codebase.
 
 ---
 
@@ -25,7 +29,7 @@ Once you verify in the tracking that the method is no longer used, you can safel
 Add this to your Gemfile:
 
 ```ruby
-gem 'deprecate_soft', path: 'path/to/your/local/gem'
+gem 'deprecate_soft'
 ```
 
 Then run:
@@ -46,8 +50,8 @@ Create an initializer in your Rails app (or load manually in a non-Rails project
 require "deprecate_soft"
 
 # Optional: require Redis or DataDog as needed
-# require "redis"
-# require "datadog/statsd"
+# require "redis"  # https://github.com/redis/redis-rb
+# require "datadog/statsd"  # https://github.com/DataDog/dogstatsd-ruby
 
 module DeprecateSoft
   # Optional: scoped setup (not global!)
@@ -195,9 +199,3 @@ Feel free to open issues or pull requests if you'd like to:
 ## 📜 License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
-
----
-
-## 💡 Inspiration
-
-Inspired by the need to track deprecated method usage in large codebases before safely removing them, with zero disruption and flexible metrics support.
