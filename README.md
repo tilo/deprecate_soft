@@ -128,7 +128,6 @@ When you call `deprecate_soft :method_name, "reason"`:
    - Calls the configured `before_hook` (if set)
    - Delegates to the original method
    - Calls the configured `after_hook` (if set)
-3. The renamed method is made private to discourage direct use.
 
 This ensures consistent tracking, clean method resolution, and avoids accidental bypassing.
 
@@ -168,16 +167,18 @@ config.before_hook = ->(method, message, args:) {
 
 ## 🛡 Best Practices
 
-- Only use for methods you plan to remove but want to measure first.
+- Use `deprecate_soft` for methods you plan to remove but want to confirm they are no longer used.
 - Integrate with your observability platform for tracking.
-- Review usage stats before deleting deprecated methods.
+- Review usage stats before deleting deprecated methods from your code.
 
 ---
 
 ## 🧰 Limitations / Notes
 
 - Make sure hooks do not raise or interfere with production behavior.
+  -> Only use non-blocking, low-latency methods for tracking!
 - Currently assumes Ruby 2.5+ (for `&.` and keyword args support).
+- Currently keeps the visibility of the renamed original method the same (does not make it private).
 
 ---
 
