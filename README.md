@@ -169,7 +169,7 @@ class MyService
     puts "doing something with #{a} and #{b}"
   end
 
-  deprecate_soft :legacy_method, "Use #new_method instead"
+  deprecate_soft :legacy_method, "will be removed"
 end
 
 MyService.legacy_method(1, 2) # will exercise the tracking hooks
@@ -187,6 +187,7 @@ When you call `deprecate_soft :method_name, "reason"`:
    - Calls the configured `before_hook` (if set)
    - Delegates to the original method
    - Calls the configured `after_hook` (if set)
+3. The optional `message` with the reason can help identifying alternatives.
 
 This ensures consistent tracking, clean method resolution, and avoids accidental bypassing.
 
@@ -221,6 +222,33 @@ config.before_hook = ->(method, message, args:) {
   Rails.logger.warn "DEPRECATED: #{method} - #{message}"
 }
 ```
+
+## 🧪🧪🧪 Advaned Hook with Caller Tracking:
+
+You can also track callers, so you can identify where you still have to fix your source code:
+
+
+### Redis:
+
+```ruby
+config.before_hook = lambda do |method, message, args:|
+  # Get the direct caller of the deprecated method
+  caller_info = caller_locations(1, 1).first
+
+  caller_key = if caller_info
+    "#{caller_info.path}:#{caller_info.lineno}"
+  else
+    "unknown"
+  end
+
+  # Track a global usage counter
+  $redis.incr("deprecate_soft:#{method}")
+
+  # Track usage by caller location
+  $redis.incr("deprecate_soft:#{method}:caller:#{caller_key}")
+end
+```
+
 
 ---
 

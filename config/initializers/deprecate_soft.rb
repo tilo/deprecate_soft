@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "deprecate_soft"
 
 # require 'datadog/statsd'
