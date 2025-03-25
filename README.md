@@ -142,6 +142,7 @@ These names are never called directly — they're used internally to wrap and pr
 
 ## 🧩 Usage
 
+🚨 Always declare `deprecate_soft` **after** the method definition!
 
 ### For Instance Methods:
 
@@ -149,14 +150,14 @@ These names are never called directly — they're used internally to wrap and pr
 class MyService
   include DeprecateSoft
 
-  def legacy_method(a, b)
+  def deprecated_method(a, b)
     puts "doing something with #{a} and #{b}"
   end
 
-  deprecate_soft :legacy_method, "Use #new_method instead"
+  deprecate_soft :deprecated_method, "Use #new_method instead"
 end
 
-MyService.new.legacy_method(1, 2) # will exercise the tracking hooks
+MyService.new.deprecated_method(1, 2) # will exercise the tracking hooks
 ```
 
 ### For Class Methods:
@@ -165,14 +166,14 @@ MyService.new.legacy_method(1, 2) # will exercise the tracking hooks
 class MyService
   extend DeprecateSoft
 
-  def self.legacy_method(a, b)
+  def self.deprecated_method(a, b)
     puts "doing something with #{a} and #{b}"
   end
 
-  deprecate_soft :legacy_method, "will be removed"
+  deprecate_soft :deprecated_method, "will be removed"
 end
 
-MyService.legacy_method(1, 2) # will exercise the tracking hooks
+MyService.deprecated_method(1, 2) # will exercise the tracking hooks
 
 ```
 
@@ -279,6 +280,7 @@ Klass#legacy_method:caller:app/jobs/cleanup_job.rb:88 → 4
 - Use `deprecate_soft` for methods you plan to remove but want to confirm they are no longer used.
 - Integrate with your observability platform for tracking.
 - Review usage stats before deleting deprecated methods from your code.
+- 🚨 Always declare `deprecate_soft` **after** the method definition! 🚨
 
 ---
 
