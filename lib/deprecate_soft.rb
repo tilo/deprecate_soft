@@ -32,6 +32,7 @@ module DeprecateSoft
 
   module InstanceMethods
     def deprecate_soft(method_name, message)
+      #  protect against declaring deprecate_soft before method is defined
       return unless method_defined?(method_name) || private_method_defined?(method_name)
 
       DeprecateSoft::MethodWrapper.wrap_method(self, method_name, message, is_class_method: false)
@@ -40,6 +41,7 @@ module DeprecateSoft
 
   module ClassMethods
     def deprecate_soft(method_name, message)
+      #  protect against declaring deprecate_soft before method is defined
       return unless singleton_class.method_defined?(method_name) || singleton_class.private_method_defined?(method_name)
 
       DeprecateSoft::MethodWrapper.wrap_method(self, method_name, message, is_class_method: true)

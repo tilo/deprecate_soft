@@ -10,7 +10,7 @@ module DeprecateSoft
         # Instance method
         DeprecateSoft::MethodWrapper.wrap_method(self, method_name, message, is_class_method: false)
       else # rubocop:disable Style/EmptyElse
-        # this happens if someone uses "deprecate_soft" declaraion before the method is defined
+        #  protect against declaring deprecate_soft before method is defined
         #
         # Do nothing — fail-safe in production
       end
