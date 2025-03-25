@@ -31,17 +31,17 @@ module DeprecateSoft
   end
 
   module InstanceMethods
-    include MethodWrapper
-
     def deprecate_soft(method_name, message)
+      return unless method_defined?(method_name) || private_method_defined?(method_name)
+
       DeprecateSoft::MethodWrapper.wrap_method(self, method_name, message, is_class_method: false)
     end
   end
 
   module ClassMethods
-    include MethodWrapper
-
     def deprecate_soft(method_name, message)
+      return unless singleton_class.method_defined?(method_name) || singleton_class.private_method_defined?(method_name)
+
       DeprecateSoft::MethodWrapper.wrap_method(self, method_name, message, is_class_method: true)
     end
   end

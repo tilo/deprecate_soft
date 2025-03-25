@@ -2,22 +2,22 @@
 
 require 'spec_helper'
 require 'deprecate_soft'
+require 'deprecate_soft/global_monkey_patch'
 
-RSpec.describe DeprecateSoft do
+# Enable the global patch for this file only
+class Module
+  include DeprecateSoft::GlobalMonkeyPatch
+end
+
+RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
   before do
     DeprecateSoft.before_hook = nil
     DeprecateSoft.after_hook = nil
   end
 
-  it 'has a version number' do
-    expect(DeprecateSoft::VERSION).not_to be nil
-  end
-
-  describe 'instance method deprecation' do
+  describe 'instance method deprecation with global patch' do
     let(:klass) do
       Class.new do
-        include DeprecateSoft
-
         def hello(name)
           "Hello, #{name}"
         end
@@ -31,7 +31,6 @@ RSpec.describe DeprecateSoft do
     end
 
     it 'does not raise if before_hook is nil' do
-      DeprecateSoft.before_hook = nil
       expect { klass.new.hello('world') }.not_to raise_error
     end
 
@@ -49,7 +48,6 @@ RSpec.describe DeprecateSoft do
     end
 
     it 'does not raise if after_hook is nil' do
-      DeprecateSoft.after_hook = nil
       expect { klass.new.hello('world') }.not_to raise_error
     end
 
@@ -67,11 +65,9 @@ RSpec.describe DeprecateSoft do
     end
   end
 
-  describe 'class method deprecation' do
+  describe 'class method deprecation with global patch' do
     let(:klass) do
       Class.new do
-        extend DeprecateSoft
-
         def self.hello(name)
           "Hi, #{name}"
         end
@@ -84,8 +80,7 @@ RSpec.describe DeprecateSoft do
       expect(klass.hello('Alice')).to eq('Hi, Alice')
     end
 
-    it 'does not raise for class method if before_hook is nil' do
-      DeprecateSoft.before_hook = nil
+    it 'does not raise if before_hook is nil' do
       expect { klass.hello('admin') }.not_to raise_error
     end
 
@@ -102,11 +97,6 @@ RSpec.describe DeprecateSoft do
       expect(called[2]).to eq(['Bob'])
     end
 
-    it 'does not raise for class method if before_hook is nil' do
-      DeprecateSoft.before_hook = nil
-      expect { klass.hello('admin') }.not_to raise_error
-    end
-
     it 'calls after_hook if defined' do
       called = nil
       DeprecateSoft.after_hook = lambda do |method, message, result:|
@@ -121,10 +111,9 @@ RSpec.describe DeprecateSoft do
     end
   end
 
-  describe 'incorrect usage of deprecate_soft' do
+  describe 'incorrect usage of deprecate_soft with global monkey patch' do
     it 'does not raise if called before defining an instance method' do
       klass = Class.new do
-        include DeprecateSoft
         deprecate_soft :not_yet_defined, 'will define later'
         def not_yet_defined
           'ok'
@@ -136,7 +125,6 @@ RSpec.describe DeprecateSoft do
 
     it 'does not raise if called before defining a class method' do
       klass = Class.new do
-        extend DeprecateSoft
         deprecate_soft :not_yet_classy, 'class method not yet defined'
         def self.not_yet_classy
           'ok'
