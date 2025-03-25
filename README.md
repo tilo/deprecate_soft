@@ -19,7 +19,7 @@ Once tracking confirms that a deprecated method is no longer in use, you can con
 - Works with instance methods in any class or module
 - Works with class or module methods in any class or module
 - System-wide hook configuration (before and after)
-- No monkey-patching or global pollution
+- No monkey-patching or global pollution — unless you explicitly opt in via `GlobalMonkeyPatch`
 - Fully compatible with Rails or plain Ruby apps
 
 ---
@@ -275,11 +275,13 @@ Klass#legacy_method:caller:app/jobs/cleanup_job.rb:88 → 4
 
 --- 
 
-## 💪 Global Monkey Patching
+## 💪 Optional: Global Monkey Patching
 
-For large projects it can be beneficial to enable `deprecate_soft` throughout the code base, without having to explicitly `require 'deprecate_soft'` in each affected file.
+For large projects, it can be beneficial to enable deprecate_soft across the entire codebase without having to explicitly `include DeprecateSoft` or e`xtend DeprecateSoft` in each class or module.
 
-In order to do this, use this configuration in `config/initializers/deprecate_soft.rb`:
+To do this, you can globally monkey-patch `Module` by including `DeprecateSoft::GlobalMonkeyPatch`. This is **entirely optional and not enabled by default**.
+
+Add the following to your `config/initializers/deprecate_soft.rb` initializer:
 
 ```ruby
 # config/initializers/deprecate_soft.rb
