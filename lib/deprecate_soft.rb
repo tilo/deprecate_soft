@@ -17,10 +17,6 @@ module DeprecateSoft
       @suffix || 'deprecated'
     end
 
-    # def hidden_method_name(method_name)
-    #   "#{DeprecateSoft.prefix}#{method_name}_#{DeprecateSoft.suffix}"
-    # end
-
     def configure
       yield self
     end
