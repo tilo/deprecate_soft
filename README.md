@@ -273,6 +273,34 @@ Klass#legacy_method:caller:app/jobs/cleanup_job.rb:88 → 4
 
 💡 Now you not only know that the method is still used -- you know where from, and how often -- so you can fix your code.
 
+--- 
+
+## 💪 Global Monkey Patching
+
+For large projects it can be beneficial to enable `deprecate_soft` throughout the code base, without having to explicitly `require 'deprecate_soft'` in each affected file.
+
+In order to do this, use this configuration in `config/initializers/deprecate_soft.rb`:
+
+```ruby
+# config/initializers/deprecate_soft.rb
+
+require "deprecate_soft"
+require "deprecate_soft/global_monkey_patch"
+
+# ... 
+
+class Module
+  include DeprecateSoft::GlobalMonkeyPatch
+end
+
+DeprecateSoft.configure do |config|
+  #
+  # ...  
+  #
+end
+
+```
+
 ---
 
 ## 🛡 Best Practices
