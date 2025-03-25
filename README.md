@@ -11,6 +11,8 @@ It’s ideal for monitoring deprecated method usage across your application usin
 
 Once tracking confirms that a deprecated method is no longer in use, you can confidently delete it from your codebase.
 
+This mechanism has been **proven in large-scale production systems** to safely clean up legacy code — this gem reimagines that functionality to help you clean up your code with confidence.
+
 ---
 
 ## ✨ Features
