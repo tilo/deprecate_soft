@@ -321,7 +321,6 @@ end
 - Make sure hooks do not raise or interfere with production behavior.
 - Only use non-blocking, low-latency methods for tracking!
 - Currently assumes Ruby 2.5+ (for `&.` and keyword args support).
-- Currently keeps the visibility of the renamed original method the same (does not make it private).
 
 ---
 
@@ -329,9 +328,9 @@ end
 
 Feel free to open issues or pull requests if you'd like to:
 
-- Add support for class methods
+- Request new features
 - Add Railtie for automatic setup
-- Add built-in backends (e.g. Redis, StatsD)
+- Add support for other backends
 
 ---
 
