@@ -2,6 +2,8 @@
 
 require_relative 'deprecate_soft/version'
 
+require_relative 'deprecate_soft/method_wrapper'
+
 module DeprecateSoft
   class << self
     attr_accessor :before_hook, :after_hook
@@ -15,9 +17,9 @@ module DeprecateSoft
       @suffix || 'deprecated'
     end
 
-    def hidden_method_name(method_name)
-      "#{DeprecateSoft.prefix}#{method_name}_#{DeprecateSoft.suffix}"
-    end
+    # def hidden_method_name(method_name)
+    #   "#{DeprecateSoft.prefix}#{method_name}_#{DeprecateSoft.suffix}"
+    # end
 
     def configure
       yield self
@@ -33,35 +35,18 @@ module DeprecateSoft
   end
 
   module InstanceMethods
+    include MethodWrapper
+
     def deprecate_soft(method_name, message)
-      original_method = instance_method(method_name)
-      hidden_method_name = DeprecateSoft.hidden_method_name(method_name)
-
-      define_method(hidden_method_name, original_method)
-
-      define_method(method_name) do |*args, &block|
-        full_method_name = "#{self.class}##{method_name}"
-        DeprecateSoft.before_hook&.call(full_method_name, message, args: args) if DeprecateSoft.before_hook
-        result = send(hidden_method_name, *args, &block)
-        DeprecateSoft.after_hook&.call(full_method_name, message, result: result) if DeprecateSoft.after_hook
-        result
-      end
+      DeprecateSoft::MethodWrapper.wrap_method(self, method_name, message, is_class_method: false)
     end
   end
 
   module ClassMethods
-    def deprecate_soft(method_name, message)
-      original_method = method(method_name)
-      hidden_method_name = DeprecateSoft.hidden_method_name(method_name)
+    include MethodWrapper
 
-      singleton_class.define_method(hidden_method_name, original_method)
-      singleton_class.define_method(method_name) do |*args, &block|
-        full_method_name = "#{self.name}.#{method_name}"
-        DeprecateSoft.before_hook&.call(full_method_name, message, args: args) if DeprecateSoft.before_hook
-        result = send(hidden_method_name, *args, &block)
-        DeprecateSoft.after_hook&.call(full_method_name, message, result: result) if DeprecateSoft.after_hook
-        result
-      end
+    def deprecate_soft(method_name, message)
+      DeprecateSoft::MethodWrapper.wrap_method(self, method_name, message, is_class_method: true)
     end
   end
 end

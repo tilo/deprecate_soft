@@ -7,7 +7,19 @@ Style/StringLiterals:
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: single_quotes
 
+Metrics/AbcSize:
+  Enabled: false
+
 Metrics/BlockLength:
+  Enabled: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
   Enabled: false
 
 Lint/UnusedBlockArgument:
