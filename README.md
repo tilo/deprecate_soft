@@ -1,7 +1,7 @@
 
 # DeprecateSoft
 
-DeprecateSoft is a lightweight and flexible Ruby gem designed to help you gracefully and safely deprecate methods.
+DeprecateSoft is a lightweight and flexible Ruby gem designed to help you gracefully and safely delete methods.
 
 It was inspired by the need to track deprecated method usage in large codebases before safely removing old code — with zero disruption and flexible metrics support.
 
