@@ -25,6 +25,9 @@ This mechanism has been **proven in large-scale production systems** to safely c
 - Fully compatible with Rails or plain Ruby apps
 
 ---
+## 📖 Blog Posts
+- [Safely Delete Old Ruby Code with deprecate_soft](https://medium.com/@tilo-sloboda/safely-delete-old-code-with-deprecate-soft-89e819b41d52)
+---
 
 ## 🚀 Installation
 
@@ -39,6 +42,62 @@ Then run:
 ```sh
 bundle install
 ```
+
+And add your initializer file.
+
+---
+
+## 🧩 Usage
+
+Declare `deprecate_soft` **after** the method definition.
+
+### For Instance Methods:
+
+```ruby
+class MyService
+  include DeprecateSoft
+
+  def deprecated_method(a, b)
+    puts "doing something with #{a} and #{b}"
+  end
+
+  deprecate_soft :deprecated_method, "Use #new_method instead"
+end
+
+MyService.new.deprecated_method(1, 2) # will exercise the tracking hooks
+```
+
+### For Class Methods:
+
+```ruby
+class MyService
+  extend DeprecateSoft
+
+  def self.deprecated_method(a, b)
+    puts "doing something with #{a} and #{b}"
+  end
+
+  deprecate_soft :deprecated_method, "will be removed"
+end
+
+MyService.deprecated_method(1, 2) # will exercise the tracking hooks
+
+```
+
+---
+
+## 🔐 What It Does Under the Hood
+
+When you call `deprecate_soft :method_name, "reason"`:
+
+1. It renames the original method to `__method_name_deprecated`.
+2. It defines a new method with the original name that:
+   - Calls the configured `before_hook` (if set)
+   - Delegates to the original method
+   - Calls the configured `after_hook` (if set)
+3. The optional `message` with the reason can help identifying alternatives.
+
+This ensures consistent tracking, clean method resolution, and avoids accidental bypassing.
 
 ---
 
@@ -98,7 +157,7 @@ end
 
 This setup ensures you can plug in **any tracking backend** you like — without polluting the global namespace.
 
-### 🔧 Customizing Method Name Wrapping
+### 🔧 Optional: Customizing Method Name Wrapping
 
 When `deprecate_soft` wraps a method, it renames the original method internally to preserve its behavior. You can customize how that internal method is named by configuring a `prefix` and `suffix`.
 
@@ -138,61 +197,6 @@ This gives you full control over how deprecated methods are renamed internally.
 | `"_"`       | `"__"`         | `foo`         | `_foo__`                  |
 
 These names are never called directly — they're used internally to wrap and preserve the original method logic.
-
-
----
-
-## 🧩 Usage
-
-🚨 Always declare `deprecate_soft` **after** the method definition!
-
-### For Instance Methods:
-
-```ruby
-class MyService
-  include DeprecateSoft
-
-  def deprecated_method(a, b)
-    puts "doing something with #{a} and #{b}"
-  end
-
-  deprecate_soft :deprecated_method, "Use #new_method instead"
-end
-
-MyService.new.deprecated_method(1, 2) # will exercise the tracking hooks
-```
-
-### For Class Methods:
-
-```ruby
-class MyService
-  extend DeprecateSoft
-
-  def self.deprecated_method(a, b)
-    puts "doing something with #{a} and #{b}"
-  end
-
-  deprecate_soft :deprecated_method, "will be removed"
-end
-
-MyService.deprecated_method(1, 2) # will exercise the tracking hooks
-
-```
-
----
-
-## 🔐 What It Does Under the Hood
-
-When you call `deprecate_soft :method_name, "reason"`:
-
-1. It renames the original method to `__method_name_deprecated`.
-2. It defines a new method with the original name that:
-   - Calls the configured `before_hook` (if set)
-   - Delegates to the original method
-   - Calls the configured `after_hook` (if set)
-3. The optional `message` with the reason can help identifying alternatives.
-
-This ensures consistent tracking, clean method resolution, and avoids accidental bypassing.
 
 ---
 
@@ -312,7 +316,7 @@ end
 - Use `deprecate_soft` for methods you plan to remove but want to confirm they are no longer used.
 - Integrate with your observability platform for tracking.
 - Review usage stats before deleting deprecated methods from your code.
-- 🚨 Always declare `deprecate_soft` **after** the method definition! 🚨
+- Always declare `deprecate_soft` **after** the method definition.
 
 ---
 
