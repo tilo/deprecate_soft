@@ -5,6 +5,20 @@ require_relative 'deprecate_soft/version'
 require_relative 'deprecate_soft/method_wrapper'
 
 module DeprecateSoft
+  def configure_base(base)
+    base.extend(ClassMethods)
+    base.extend(InstanceMethods)
+  end
+  module_function :configure_base
+
+  def included(base)
+    configure_base(base)
+  end
+
+  def extended(base)
+    configure_base(base)
+  end
+
   class << self
     attr_accessor :before_hook, :after_hook
     attr_writer :prefix, :suffix
@@ -19,14 +33,6 @@ module DeprecateSoft
 
     def configure
       yield self
-    end
-
-    def included(base)
-      base.extend InstanceMethods
-    end
-
-    def extended(base)
-      base.extend ClassMethods
     end
   end
 

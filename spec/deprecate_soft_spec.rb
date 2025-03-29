@@ -13,6 +13,15 @@ RSpec.describe DeprecateSoft do
     expect(DeprecateSoft::VERSION).not_to be nil
   end
 
+  it 'silently skips wrapping if method does not exist' do
+    klass = Class.new do
+      include DeprecateSoft
+      deprecate_soft :nonexistent, 'no-op'
+    end
+
+    expect { klass.new }.not_to raise_error
+  end
+
   describe 'instance method deprecation' do
     let(:klass) do
       Class.new do
@@ -64,6 +73,32 @@ RSpec.describe DeprecateSoft do
       expect(called[0]).to match(/#hello/)
       expect(called[1]).to eq('Use #greet instead')
       expect(called[2]).to eq('Hello, bar')
+    end
+
+    it 'handles multiple deprecations correctly' do
+      called = []
+
+      DeprecateSoft.before_hook = lambda do |method, message, args:|
+        called << [method, message]
+      end
+
+      klass = Class.new do
+        include DeprecateSoft
+
+        def foo; :foo; end
+        def bar; :bar; end
+
+        deprecate_soft :foo, 'Use something else'
+        deprecate_soft :bar, 'Use something else again'
+      end
+
+      obj = klass.new
+      obj.foo
+      obj.bar
+
+      expect(called.size).to eq(2)
+      expect(called[0][0]).to match(/#foo/)
+      expect(called[1][0]).to match(/#bar/)
     end
   end
 
@@ -118,6 +153,35 @@ RSpec.describe DeprecateSoft do
       expect(called[0]).to match(/\.hello/)
       expect(called[1]).to eq('Use .greet instead')
       expect(called[2]).to eq('Hi, Zoe')
+    end
+
+    describe "with multiple deprecated methods" do
+      let(:klass) do
+        Class.new do
+          extend DeprecateSoft
+
+          def self.foo; :foo; end
+          deprecate_soft :foo, 'to be deleted'
+
+          def self.bar; :bar; end
+          deprecate_soft :bar, 'to be deleted'
+        end
+      end
+
+      it 'handles multiple class method deprecations correctly' do
+        called = []
+
+        DeprecateSoft.before_hook = lambda do |method, message, args:|
+          called << [method, message]
+        end
+
+        klass.foo
+        klass.bar
+
+        expect(called.size).to eq(2)
+        expect(called[0][0]).to match(/\.foo/)
+        expect(called[1][0]).to match(/\.bar/)
+      end
     end
   end
 
