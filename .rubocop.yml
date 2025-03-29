@@ -36,3 +36,6 @@ Style/Documentation:
 
 Style/RedundantSelf:
   Enabled: false
+
+Style/SingleLineMethods:
+  Enabled: false

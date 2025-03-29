@@ -6,27 +6,55 @@ module DeprecateSoft
       hidden_method_name = "#{DeprecateSoft.prefix}#{method_name}_#{DeprecateSoft.suffix}"
 
       if is_class_method
+        target = context.singleton_class
+
+        return if target.method_defined?(hidden_method_name) || target.private_method_defined?(hidden_method_name)
+
         original_method = context.method(method_name)
+        target.define_method(hidden_method_name, original_method)
 
-        context.singleton_class.define_method(hidden_method_name, original_method)
-
-        context.singleton_class.define_method(method_name) do |*args, &block|
+        target.define_method(method_name) do |*args, &block|
           full_name = "#{self.name}.#{method_name}"
-          DeprecateSoft.before_hook&.call(full_name, message, args: args) if defined?(DeprecateSoft.before_hook)
+
+          begin
+            DeprecateSoft.before_hook&.call(full_name, message, args: args)
+          rescue StandardError => e
+            warn "DeprecateSoft.before_hook error: #{e.class} - #{e.message}"
+          end
+
           result = send(hidden_method_name, *args, &block)
-          DeprecateSoft.after_hook&.call(full_name, message, result: result) if defined?(DeprecateSoft.after_hook)
+
+          begin
+            DeprecateSoft.after_hook&.call(full_name, message, result: result)
+          rescue StandardError => e
+            warn "DeprecateSoft.after_hook error: #{e.class} - #{e.message}"
+          end
+
           result
         end
       else
-        original_method = context.instance_method(method_name)
+        return if context.method_defined?(hidden_method_name) || context.private_method_defined?(hidden_method_name)
 
+        original_method = context.instance_method(method_name)
         context.define_method(hidden_method_name, original_method)
 
         context.define_method(method_name) do |*args, &block|
           full_name = "#{self.class}##{method_name}"
-          DeprecateSoft.before_hook&.call(full_name, message, args: args) if defined?(DeprecateSoft.before_hook)
+
+          begin
+            DeprecateSoft.before_hook&.call(full_name, message, args: args)
+          rescue StandardError => e
+            warn "DeprecateSoft.before_hook error: #{e.class} - #{e.message}"
+          end
+
           result = send(hidden_method_name, *args, &block)
-          DeprecateSoft.after_hook&.call(full_name, message, result: result) if defined?(DeprecateSoft.after_hook)
+
+          begin
+            DeprecateSoft.after_hook&.call(full_name, message, result: result)
+          rescue StandardError => e
+            warn "DeprecateSoft.after_hook error: #{e.class} - #{e.message}"
+          end
+
           result
         end
       end
