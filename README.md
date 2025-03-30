@@ -1,6 +1,10 @@
 
 # DeprecateSoft
 
+[![Gem Version](https://badge.fury.io/rb/deprecate_soft.svg)](https://badge.fury.io/rb/deprecate_soft)
+[![CI](https://github.com/tilo/deprecate_soft/actions/workflows/main.yml/badge.svg)](https://github.com/tilo/deprecate_soft/actions/workflows/main.yml)
+[![codecov](https://codecov.io/gh/tilo/deprecate_soft/branch/main/graph/badge.svg)](https://codecov.io/gh/tilo/deprecate_soft)
+
 DeprecateSoft is a lightweight and flexible Ruby gem designed to help you gracefully and safely delete methods.
 
 It was inspired by the need to track deprecated method usage in large codebases before safely removing old code — with zero disruption and flexible metrics support.
