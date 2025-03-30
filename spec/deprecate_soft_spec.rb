@@ -332,12 +332,14 @@ RSpec.describe DeprecateSoft do
 
         klass = Class.new do
           include DeprecateSoft
-          def self.hello; 'ok'; end
+          def self.hello
+            'works'
+          end
           deprecate_soft :hello, 'failing hook'
         end
 
         expect { klass.hello }.not_to raise_error('fail!')
-        expect(klass.hello).to eq 'ok'
+        expect(klass.hello).to eq 'works'
       end
 
       it 'still runs method if after_hook raises' do
@@ -345,12 +347,14 @@ RSpec.describe DeprecateSoft do
 
         klass = Class.new do
           include DeprecateSoft
-          def self.hello; 'ok'; end
+          def self.hello
+            'works'
+          end
           deprecate_soft :hello, 'failing hook'
         end
 
         expect { klass.hello }.not_to raise_error('fail!')
-        expect(klass.hello).to eq 'ok'
+        expect(klass.hello).to eq 'works'
       end
     end
   end
@@ -359,25 +363,27 @@ RSpec.describe DeprecateSoft do
     it 'does not raise if called before defining an instance method' do
       klass = Class.new do
         include DeprecateSoft
-        deprecate_soft :not_yet_defined, 'will define later'
+        deprecate_soft :not_yet_defined, 'class method not yet defined'
         def not_yet_defined
-          'ok'
+          'works, but no deprecate_soft'
         end
       end
 
       expect { klass.new.not_yet_defined }.not_to raise_error
+      expect(klass.new.not_yet_defined).to eq 'works, but no deprecate_soft'
     end
 
     it 'does not raise if called before defining a class method' do
       klass = Class.new do
         include DeprecateSoft
-        deprecate_soft :not_yet_classy, 'class method not yet defined'
-        def self.not_yet_classy
-          'ok'
+        deprecate_soft :not_yet_defined, 'class method not yet defined'
+        def self.not_yet_defined
+          'works, but no deprecate_soft'
         end
       end
 
-      expect { klass.not_yet_classy }.not_to raise_error
+      expect { klass.not_yet_defined }.not_to raise_error
+      expect(klass.not_yet_defined).to eq 'works, but no deprecate_soft'
     end
   end
 end
