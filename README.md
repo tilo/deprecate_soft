@@ -28,6 +28,7 @@ This mechanism has been **proven in large-scale production systems** to safely c
 ## 📖 Blog Posts
 - [Safely Delete Old Ruby Code with deprecate_soft](https://medium.com/@tilo-sloboda/safely-delete-old-code-with-deprecate-soft-89e819b41d52)
 ---
+## 📝 [Change Log](https://github.com/tilo/deprecate_soft/blob/main/CHANGELOG.md)
 
 ## 🚀 Installation
 
