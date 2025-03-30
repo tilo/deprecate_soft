@@ -54,6 +54,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'redis', '>= 4.0'
   spec.add_development_dependency 'rspec', '~> 3.12'
   spec.add_development_dependency 'rubocop', '~> 1.21'
+  spec.add_development_dependency 'simplecov', '~> 1.21'
 
   # Uncomment to register a new dependency of your gem
   # spec.add_dependency "example-gem", "~> 1.0"
