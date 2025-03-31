@@ -14,7 +14,8 @@ module DeprecateSoft
         target.define_method(hidden_method_name, original_method)
 
         target.define_method(method_name) do |*args, &block|
-          full_name = "#{self.name}.#{method_name}"
+          klass_name = self.class.name || self.class.to_s
+          full_name = "#{klass_name}.#{method_name}"
 
           begin
             DeprecateSoft.before_hook&.call(full_name, message, args: args)
@@ -39,7 +40,8 @@ module DeprecateSoft
         context.define_method(hidden_method_name, original_method)
 
         context.define_method(method_name) do |*args, &block|
-          full_name = "#{self.class}##{method_name}"
+          klass_name = self.class.name || self.to_s
+          full_name = "#{klass_name}.#{method_name}"
 
           begin
             DeprecateSoft.before_hook&.call(full_name, message, args: args)

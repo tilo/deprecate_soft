@@ -58,6 +58,8 @@ Declare `deprecate_soft` **after** the method definition.
 
 ### For Instance Methods:
 
+use `deprecate_soft`
+
 ```ruby
 class MyService
   include DeprecateSoft
@@ -74,15 +76,17 @@ MyService.new.deprecated_method(1, 2) # will exercise the tracking hooks
 
 ### For Class Methods:
 
+use `deprecate_class_soft`
+
 ```ruby
 class MyService
-  extend DeprecateSoft
+  include DeprecateSoft
 
   def self.deprecated_method(a, b)
     puts "doing something with #{a} and #{b}"
   end
 
-  deprecate_soft :deprecated_method, "will be removed"
+  deprecate_class_soft :deprecated_method, "will be removed" # ⚠️
 end
 
 MyService.deprecated_method(1, 2) # will exercise the tracking hooks
