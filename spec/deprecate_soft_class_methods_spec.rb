@@ -18,7 +18,7 @@ RSpec.describe DeprecateSoft do
           "Hi, #{name}"
         end
 
-        soft_deprecate_class_method :hello, 'Use .greet instead'
+        deprecate_class_soft :hello, 'Use .greet instead'
       end
     end
 
@@ -67,7 +67,7 @@ RSpec.describe DeprecateSoft do
         include DeprecateSoft
 
         private_class_method def self.hidden; 'secret'; end
-        soft_deprecate_class_method :hidden, 'no peeking'
+        deprecate_class_soft :hidden, 'to be deleted'
 
         def self.call_hidden
           hidden
@@ -89,7 +89,7 @@ RSpec.describe DeprecateSoft do
           include DeprecateSoft
 
           def class_method; 'hello'; end
-          soft_deprecate_class_method :class_method, 'to be deleted' # intentionally will not work!
+          deprecate_class_soft :class_method, 'to be deleted' # intentionally will not work!
         end
       end
 
@@ -106,10 +106,10 @@ RSpec.describe DeprecateSoft do
           include DeprecateSoft
 
           def self.foo; :foo; end
-          soft_deprecate_class_method :foo, 'to be deleted'
+          deprecate_class_soft :foo, 'to be deleted'
 
           def self.bar; :bar; end
-          soft_deprecate_class_method :bar, 'to be deleted'
+          deprecate_class_soft :bar, 'to be deleted'
         end
       end
 
@@ -129,11 +129,11 @@ RSpec.describe DeprecateSoft do
       end
     end
 
-    it 'wraps class method even if it is defined after soft_deprecate' do
+    it 'wraps class method even if it is defined after deprecate_class_soft' do
       klass = Class.new do
         include DeprecateSoft
 
-        soft_deprecate_class_method :later_class_method, 'will be added'
+        deprecate_class_soft :later_class_method, 'will be added'
 
         def self.later_class_method
           'defined later'
@@ -155,8 +155,8 @@ RSpec.describe DeprecateSoft do
           'foo'
         end
 
-        soft_deprecate_class_method :foo, 'first warning'
-        soft_deprecate_class_method :foo, 'second warning' # this will be ignored!
+        deprecate_class_soft :foo, 'first warning'
+        deprecate_class_soft :foo, 'second warning' # this will be ignored!
       end
 
       calls = []
@@ -175,7 +175,7 @@ RSpec.describe DeprecateSoft do
           def self.hello
             'works'
           end
-          soft_deprecate_class_method :hello, 'failing hook'
+          deprecate_class_soft :hello, 'failing hook'
         end
 
         expect { klass.hello }.not_to raise_error('fail!')
@@ -190,7 +190,7 @@ RSpec.describe DeprecateSoft do
           def self.hello
             'works'
           end
-          soft_deprecate_class_method :hello, 'failing hook'
+          deprecate_class_soft :hello, 'failing hook'
         end
 
         expect { klass.hello }.not_to raise_error('fail!')
@@ -198,7 +198,7 @@ RSpec.describe DeprecateSoft do
       end
     end
 
-    it 'wraps class method when soft_deprecate is called' do
+    it 'wraps class method when deprecate_class_soft is called' do
       klass = Class.new do
         def self.hello
           'hi'
@@ -209,7 +209,7 @@ RSpec.describe DeprecateSoft do
 
       allow(DeprecateSoft::MethodWrapper).to receive(:wrap_method).and_call_original
 
-      klass.soft_deprecate_class_method(:hello, 'this is deprecated')
+      klass.deprecate_class_soft(:hello, 'this is deprecated')
 
       expect(DeprecateSoft::MethodWrapper).to have_received(:wrap_method).with(
         klass, :hello, 'this is deprecated', is_class_method: true
@@ -219,14 +219,14 @@ RSpec.describe DeprecateSoft do
     it 'does not raise if called before defining a class method' do
       klass = Class.new do
         include DeprecateSoft
-        soft_deprecate_class_method :not_yet_defined, 'class method not yet defined'
+        deprecate_class_soft :not_yet_defined, 'class method not yet defined'
         def self.not_yet_defined
-          'works, but no soft_deprecate'
+          'works, but no deprecate_class_soft'
         end
       end
 
       expect { klass.not_yet_defined }.not_to raise_error
-      expect(klass.not_yet_defined).to eq 'works, but no soft_deprecate'
+      expect(klass.not_yet_defined).to eq 'works, but no deprecate_class_soft'
     end
   end
 end

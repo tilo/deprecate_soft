@@ -22,7 +22,7 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
           "Hello, #{name}"
         end
 
-        soft_deprecate :hello, 'Use #greet instead'
+        deprecate_soft :hello, 'Use #greet instead'
       end
     end
 
@@ -72,7 +72,7 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
           "Hi, #{name}"
         end
 
-        soft_deprecate_class_method :hello, 'Use .greet instead'
+        deprecate_class_soft :hello, 'Use .greet instead'
       end
     end
 
@@ -114,7 +114,7 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
   describe 'incorrect usage of deprecate_soft with global monkey patch' do
     it 'does not raise if called before defining an instance method' do
       klass = Class.new do
-        soft_deprecate_class_method :not_yet_defined, 'will define later'
+        deprecate_class_soft :not_yet_defined, 'will define later'
         def not_yet_defined
           'ok'
         end
@@ -125,7 +125,7 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
 
     it 'does not raise if called before defining a class method' do
       klass = Class.new do
-        soft_deprecate_class_method :not_yet_classy, 'class method not yet defined'
+        deprecate_class_soft :not_yet_classy, 'class method not yet defined'
         def self.not_yet_classy
           'ok'
         end

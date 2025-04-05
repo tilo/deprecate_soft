@@ -19,7 +19,7 @@ RSpec.describe 'DeprecateSoft with Redis tracking' do
         'TestKlass' # for string formatting in the wrapper
       end
 
-      soft_deprecate :foo, 'will be deleted'
+      deprecate_soft :foo, 'will be deleted'
     end
   end
 

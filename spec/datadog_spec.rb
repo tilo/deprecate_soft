@@ -29,7 +29,7 @@ RSpec.describe 'DeprecateSoft with DataDog tracking' do
         "x#{a}"
       end
 
-      soft_deprecate :foo, 'use #bar instead'
+      deprecate_soft :foo, 'use #bar instead'
     end)
   end
 

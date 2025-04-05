@@ -18,7 +18,7 @@ RSpec.describe DeprecateSoft do
           "Hello, #{name}"
         end
 
-        soft_deprecate :hello, 'Use #greet instead'
+        deprecate_soft :hello, 'Use #greet instead'
       end
     end
 
@@ -62,7 +62,6 @@ RSpec.describe DeprecateSoft do
       expect(called[2]).to eq('Hello, bar')
     end
 
-    # this fails: we can not wrap private methods at this time
     it 'wraps private methods too' do
       klass = Class.new do
         include DeprecateSoft
@@ -70,7 +69,7 @@ RSpec.describe DeprecateSoft do
         private
 
         def hidden; 'shh'; end
-        soft_deprecate_class_method :hidden, 'no peeking' # intentionally will not work!
+        deprecate_soft :hidden, 'to be deleted'
 
         def call_hidden
           hidden
@@ -81,7 +80,7 @@ RSpec.describe DeprecateSoft do
       DeprecateSoft.before_hook = ->(*) { called = true }
 
       expect(klass.new.send(:call_hidden)).to eq('shh') # method calls are not affected
-      expect(called).to be false # intentionally will not work!
+      expect(called).to be true
     end
 
     it 'handles multiple deprecations correctly' do
@@ -97,8 +96,8 @@ RSpec.describe DeprecateSoft do
         def foo; :foo; end
         def bar; :bar; end
 
-        soft_deprecate :foo, 'to be deleted'
-        soft_deprecate :bar, 'also to be deleted'
+        deprecate_soft :foo, 'to be deleted'
+        deprecate_soft :bar, 'also to be deleted'
       end
 
       obj = klass.new
@@ -110,10 +109,10 @@ RSpec.describe DeprecateSoft do
       expect(called[1][0]).to match(/\.bar/)
     end
 
-    it 'wraps method even if it is defined after soft_deprecate' do
+    it 'wraps method even if it is defined after deprecate_soft' do
       klass = Class.new do
         include DeprecateSoft
-        soft_deprecate :later_method, 'will be added'
+        deprecate_soft :later_method, 'will be added'
         def later_method
           'defined later'
         end
@@ -132,8 +131,8 @@ RSpec.describe DeprecateSoft do
 
         def foo; 'foo'; end
 
-        soft_deprecate :foo, 'first warning'
-        soft_deprecate :foo, 'second warning' # this will be ignored!
+        deprecate_soft :foo, 'first warning'
+        deprecate_soft :foo, 'second warning' # this will be ignored!
       end
 
       calls = []
@@ -150,7 +149,7 @@ RSpec.describe DeprecateSoft do
         klass = Class.new do
           include DeprecateSoft
           def hello; 'ok'; end
-          soft_deprecate :hello, 'failing hook'
+          deprecate_soft :hello, 'failing hook'
         end
 
         expect { klass.new.hello }.not_to raise_error('fail!')
@@ -163,7 +162,7 @@ RSpec.describe DeprecateSoft do
         klass = Class.new do
           include DeprecateSoft
           def hello; 'ok'; end
-          soft_deprecate :hello, 'failing hook'
+          deprecate_soft :hello, 'failing hook'
         end
 
         expect { klass.new.hello }.not_to raise_error('fail!')
@@ -171,7 +170,7 @@ RSpec.describe DeprecateSoft do
       end
     end
 
-    it 'wraps instance method when soft_deprecate is called' do
+    it 'wraps instance method when deprecate_soft is called' do
       klass = Class.new do
         include DeprecateSoft
 
@@ -189,7 +188,7 @@ RSpec.describe DeprecateSoft do
         end
       end
 
-      klass.soft_deprecate(:greet, 'this is deprecated')
+      klass.deprecate_soft(:greet, 'this is deprecated')
 
       expect(klass.wrap_called).to be false
       klass.new.greet
@@ -199,14 +198,14 @@ RSpec.describe DeprecateSoft do
     it 'does not raise if called before defining an instance method' do
       klass = Class.new do
         include DeprecateSoft
-        soft_deprecate_class_method :not_yet_defined, 'class method not yet defined'
+        deprecate_soft :not_yet_defined, 'instance method not yet defined'
         def not_yet_defined
-          'works, but no soft_deprecate'
+          'works, but no deprecate_soft'
         end
       end
 
       expect { klass.new.not_yet_defined }.not_to raise_error
-      expect(klass.new.not_yet_defined).to eq 'works, but no soft_deprecate'
+      expect(klass.new.not_yet_defined).to eq 'works, but no deprecate_soft'
     end
   end
 end

@@ -26,9 +26,6 @@ module DeprecateSoft
       "#{prefix}#{method_name}_#{suffix}".to_sym
     end
 
-    # To support soft_deprecate_class_method inside `class << self`,
-    # you MUST either include DeprecateSoft in that block,
-    # or use DeprecateSoft.enable_class_self(self) { ... }.
     def included(base)
       base.extend(ClassMethods)
       base.singleton_class.extend(ClassMethods)
@@ -80,7 +77,7 @@ module DeprecateSoft
   end
 
   module ClassMethods
-    def soft_deprecate(method_name, message = nil)
+    def deprecate_soft(method_name, message = nil)
       hidden = DeprecateSoft.prefixed_name(method_name)
 
       if method_defined?(method_name) || private_method_defined?(method_name)
@@ -93,7 +90,7 @@ module DeprecateSoft
       end
     end
 
-    def soft_deprecate_class_method(method_name, message = nil)
+    def deprecate_class_soft(method_name, message = nil)
       hidden = DeprecateSoft.prefixed_name(method_name)
       target = singleton_class
 
