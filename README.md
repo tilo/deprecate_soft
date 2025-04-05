@@ -334,6 +334,9 @@ end
 - Make sure hooks do not raise or interfere with production behavior.
 - Only use non-blocking, low-latency methods for tracking!
 - Currently assumes Ruby 2.5+ (for `&.` and keyword args support).
+- Class methods need to be defined via `def self.method`, not in `class << self` blocks.
+  Simply move the to-be-deprecated method out of the `self << class` and declare it via `self.method_name`.
+  This also makes the to be deleted method stand out more.
 
 ---
 
