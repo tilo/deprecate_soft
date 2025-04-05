@@ -4,6 +4,9 @@ AllCops:
 Layout/LineLength:
   Max: 180
 
+Lint/ConstantDefinitionInBlock:
+  Enabled: false
+
 Lint/UnusedBlockArgument:
   Enabled: false
 
@@ -45,3 +48,6 @@ Style/StringLiterals:
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: single_quotes
+
+Style/TrivialAccessors:
+  Enabled: false

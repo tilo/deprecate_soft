@@ -59,8 +59,10 @@ module DeprecateSoft
         include DeprecateSoft::ClassMethods
         @_pending_soft_wraps ||= {}
         instance_eval(&block)
-        DeprecateSoft.wrap_pending_class_methods(mod)
       end
+
+      # Now that methods are defined, wrap any pending
+      DeprecateSoft.wrap_pending_class_methods(mod)
     end
 
     def wrap_pending_class_methods(mod)

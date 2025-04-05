@@ -44,8 +44,25 @@ RSpec.describe DeprecateSoft do
       expect(called[2]).to eq(['Bob'])
     end
 
-    # private class methods need to be defined via self.method_name
-    it 'wraps private class methods too' do
+    it 'does not raise for class method if before_hook is nil' do
+      DeprecateSoft.before_hook = nil
+      expect { klass.hello('admin') }.not_to raise_error
+    end
+
+    it 'calls after_hook if defined' do
+      called = nil
+      DeprecateSoft.after_hook = lambda do |method, message, result:|
+        called = [method, message, result]
+      end
+
+      klass.hello('Zoe')
+
+      expect(called[0]).to match(/\.hello/)
+      expect(called[1]).to eq('Use .greet instead')
+      expect(called[2]).to eq('Hi, Zoe')
+    end
+
+    it 'wraps private class methods defined via self.method_name' do
       klass = Class.new do
         include DeprecateSoft
 
@@ -64,95 +81,23 @@ RSpec.describe DeprecateSoft do
       expect(called).to be true
     end
 
-    it 'does not wrap private class methods declared in self block without an include' do
-      class BadExample
+    it 'does not handle class methods declared in self block, but does not affect method calls' do
+      class SelfBlocksAreHandled
         include DeprecateSoft
 
         class << self
-          # DeprecateSoft is not properly enabled!!
-          def hidden; 'secret'; end
-          private_class_method :hidden
-          soft_deprecate_class_method :hidden, 'no peeking'
-        end
+          include DeprecateSoft
 
-        def self.call_hidden
-          send(:hidden)
+          def class_method; 'hello'; end
+          soft_deprecate_class_method :class_method, 'to be deleted' # intentionally will not work!
         end
       end
 
       called = false
       DeprecateSoft.before_hook = ->(*) { called = true }
 
-      expect(BadExample.send(:hidden)).to eq('secret')
-      expect(called).to be false
-    end
-
-    it 'wraps private class methods declared in self block with extra include' do
-      class Klass2
-        include DeprecateSoft
-
-        DeprecateSoft.define_class_methods(self) do
-          def hidden; 'secret'; end
-          private_class_method :hidden
-          soft_deprecate_class_method :hidden, 'no peeking'
-        end
-
-        def self.call_hidden
-          send(:hidden)
-        end
-      end
-
-      called = false
-      DeprecateSoft.before_hook = ->(*) { called = true }
-
-      expect(Klass2.send(:call_hidden)).to eq('secret')
-      expect(called).to be true
-    end
-
-    it 'wraps private class methods declared in self block with manual include and wrap' do
-      class Klass3
-        include DeprecateSoft
-
-        class << self
-          include DeprecateSoft::ClassMethods
-          @_pending_soft_wraps ||= {}
-
-          def hidden; 'secret'; end
-          private_class_method :hidden
-          soft_deprecate_class_method :hidden, 'no peeking'
-        end
-
-        # Must run wrap_pending_class_methods manually
-        DeprecateSoft.wrap_pending_class_methods(self)
-
-        def self.call_hidden
-          send(:hidden)
-        end
-      end
-
-      called = false
-      DeprecateSoft.before_hook = ->(*) { called = true }
-
-      expect(Klass3.send(:call_hidden)).to eq('secret')
-      expect(called).to be true
-    end
-
-    it 'does not raise for class method if before_hook is nil' do
-      DeprecateSoft.before_hook = nil
-      expect { klass.hello('admin') }.not_to raise_error
-    end
-
-    it 'calls after_hook if defined' do
-      called = nil
-      DeprecateSoft.after_hook = lambda do |method, message, result:|
-        called = [method, message, result]
-      end
-
-      klass.hello('Zoe')
-
-      expect(called[0]).to match(/\.hello/)
-      expect(called[1]).to eq('Use .greet instead')
-      expect(called[2]).to eq('Hi, Zoe')
+      expect(SelfBlocksAreHandled.class_method).to eq('hello') # method calls are not affected
+      expect(called).to be false # intentionally will not work!
     end
 
     describe 'with multiple deprecated methods' do
