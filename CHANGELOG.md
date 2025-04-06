@@ -1,6 +1,18 @@
 
 ## 📝 DepracateSoft Change Log
 
+## [1.2.0] - 2025-04-05
+### ✨ Added Support
+ - improving handling of class methods
+ - added deprecate_class_soft for class methods. Fixed [Issue #1](https://github.com/tilo/deprecate_soft/issues/1)
+ - support to define the method after the declaration
+### 🛠️ Internals
+ - stream-lined include DeprecateSoft
+### 📐 Deliberate Limitations
+ - Class methods need to be defined via `def self.method`, not in `class << self` blocks.
+   Simply move the to-be-deprecated method out of the `self << class` and declare it via `self.method_name`.
+   This also makes the to be deleted method stand out more.
+
 ## [1.1.0] - 2025-03-29
 ### ✨ Added Support
  - Errors in `before_hook` / `after_hook` do not prevent method execution.

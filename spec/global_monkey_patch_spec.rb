@@ -42,7 +42,7 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
 
       klass.new.hello('foo')
 
-      expect(called[0]).to match(/#hello/)
+      expect(called[0]).to match(/\.hello/)
       expect(called[1]).to eq('Use #greet instead')
       expect(called[2]).to eq(['foo'])
     end
@@ -59,9 +59,45 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
 
       klass.new.hello('bar')
 
-      expect(called[0]).to match(/#hello/)
+      expect(called[0]).to match(/\.hello/)
       expect(called[1]).to eq('Use #greet instead')
       expect(called[2]).to eq('Hello, bar')
+    end
+
+    it 'allows deprecate_soft on instance method defined later' do
+      klass = Class.new do
+        include DeprecateSoft
+
+        deprecate_soft :later_instance_method, 'will be removed'
+
+        def later_instance_method
+          'hi'
+        end
+      end
+
+      called = false
+      DeprecateSoft.before_hook = ->(*) { called = true }
+
+      expect(klass.new.later_instance_method).to eq('hi')
+      expect(called).to be true
+    end
+
+    it 'tracks pending instance method in global monkey patch if not included' do
+      klass = Class.new do
+        include DeprecateSoft
+
+        deprecate_soft :delayed, 'will be added later'
+
+        def delayed
+          'hello'
+        end
+      end
+
+      called = false
+      DeprecateSoft.before_hook = ->(*) { called = true }
+
+      expect(klass.new.delayed).to eq('hello')
+      expect(called).to be true
     end
   end
 
@@ -72,7 +108,7 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
           "Hi, #{name}"
         end
 
-        deprecate_soft :hello, 'Use .greet instead'
+        deprecate_class_soft :hello, 'Use .greet instead'
       end
     end
 
@@ -109,12 +145,48 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
       expect(called[1]).to eq('Use .greet instead')
       expect(called[2]).to eq('Hi, Zoe')
     end
+
+    it 'allows deprecate_class_soft on class method defined later' do
+      klass = Class.new do
+        include DeprecateSoft
+
+        deprecate_class_soft :later_class_method, 'deprecated'
+
+        def self.later_class_method
+          'yo'
+        end
+      end
+
+      called = false
+      DeprecateSoft.before_hook = ->(*) { called = true }
+
+      expect(klass.later_class_method).to eq('yo')
+      expect(called).to be true
+    end
+
+    it 'tracks pending class method in global monkey patch if not included' do
+      klass = Class.new do
+        include DeprecateSoft
+
+        deprecate_class_soft :delayed_class_method, 'will be added later'
+
+        def self.delayed_class_method
+          'world'
+        end
+      end
+
+      called = false
+      DeprecateSoft.before_hook = ->(*) { called = true }
+
+      expect(klass.delayed_class_method).to eq('world')
+      expect(called).to be true
+    end
   end
 
   describe 'incorrect usage of deprecate_soft with global monkey patch' do
     it 'does not raise if called before defining an instance method' do
       klass = Class.new do
-        deprecate_soft :not_yet_defined, 'will define later'
+        deprecate_class_soft :not_yet_defined, 'will define later'
         def not_yet_defined
           'ok'
         end
@@ -125,7 +197,7 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
 
     it 'does not raise if called before defining a class method' do
       klass = Class.new do
-        deprecate_soft :not_yet_classy, 'class method not yet defined'
+        deprecate_class_soft :not_yet_classy, 'class method not yet defined'
         def self.not_yet_classy
           'ok'
         end
