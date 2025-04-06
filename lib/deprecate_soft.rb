@@ -28,7 +28,6 @@ module DeprecateSoft
 
     def included(base)
       base.extend(ClassMethods)
-      base.singleton_class.extend(ClassMethods)
 
       base.define_singleton_method(:method_added) do |method_name|
         pending = base.instance_variable_get(:@__pending_soft_wraps)
@@ -38,41 +37,13 @@ module DeprecateSoft
         super(method_name) if defined?(super)
       end
 
-      base.singleton_class.class_eval do
-        define_method(:singleton_method_added) do |method_name|
-          pending = instance_variable_get(:@_pending_soft_wraps)
-          if pending&.key?(method_name)
-            DeprecateSoft::MethodWrapper.wrap_method(base, method_name, pending.delete(method_name), is_class_method: true)
-          end
-          super(method_name) if defined?(super)
+      base.singleton_class.define_method(:singleton_method_added) do |method_name|
+        pending = instance_variable_get(:@_pending_soft_wraps)
+        if pending&.key?(method_name)
+          DeprecateSoft::MethodWrapper.wrap_method(base, method_name, pending.delete(method_name), is_class_method: true)
         end
+        super(method_name) if defined?(super)
       end
-    end
-
-    # Macro for cleanly entering class << self with hooks included
-    def define_class_methods(mod, &block)
-      eigen = class << mod; self; end
-      eigen.class_eval do
-        include DeprecateSoft::ClassMethods
-        @_pending_soft_wraps ||= {}
-        instance_eval(&block)
-      end
-
-      # Now that methods are defined, wrap any pending
-      DeprecateSoft.wrap_pending_class_methods(mod)
-    end
-
-    def wrap_pending_class_methods(mod)
-      eigen = class << mod; self; end
-      pending = eigen.instance_variable_get(:@_pending_soft_wraps)
-      return unless pending
-
-      pending.each do |method_name, message|
-        DeprecateSoft::MethodWrapper.wrap_method(mod, method_name, message, is_class_method: true)
-        # eigen.send(:private, method_name) # preserve original visibility
-      end
-
-      eigen.remove_instance_variable(:@_pending_soft_wraps)
     end
   end
 

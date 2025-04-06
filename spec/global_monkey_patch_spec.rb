@@ -63,6 +63,42 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
       expect(called[1]).to eq('Use #greet instead')
       expect(called[2]).to eq('Hello, bar')
     end
+
+    it 'allows deprecate_soft on instance method defined later' do
+      klass = Class.new do
+        include DeprecateSoft
+
+        deprecate_soft :later_instance_method, 'will be removed'
+
+        def later_instance_method
+          'hi'
+        end
+      end
+
+      called = false
+      DeprecateSoft.before_hook = ->(*) { called = true }
+
+      expect(klass.new.later_instance_method).to eq('hi')
+      expect(called).to be true
+    end
+
+    it 'tracks pending instance method in global monkey patch if not included' do
+      klass = Class.new do
+        include DeprecateSoft
+
+        deprecate_soft :delayed, 'will be added later'
+
+        def delayed
+          'hello'
+        end
+      end
+
+      called = false
+      DeprecateSoft.before_hook = ->(*) { called = true }
+
+      expect(klass.new.delayed).to eq('hello')
+      expect(called).to be true
+    end
   end
 
   describe 'class method deprecation with global patch' do
@@ -108,6 +144,42 @@ RSpec.describe 'DeprecateSoft::GlobalMonkeyPatch' do
       expect(called[0]).to match(/\.hello/)
       expect(called[1]).to eq('Use .greet instead')
       expect(called[2]).to eq('Hi, Zoe')
+    end
+
+    it 'allows deprecate_class_soft on class method defined later' do
+      klass = Class.new do
+        include DeprecateSoft
+
+        deprecate_class_soft :later_class_method, 'deprecated'
+
+        def self.later_class_method
+          'yo'
+        end
+      end
+
+      called = false
+      DeprecateSoft.before_hook = ->(*) { called = true }
+
+      expect(klass.later_class_method).to eq('yo')
+      expect(called).to be true
+    end
+
+    it 'tracks pending class method in global monkey patch if not included' do
+      klass = Class.new do
+        include DeprecateSoft
+
+        deprecate_class_soft :delayed_class_method, 'will be added later'
+
+        def self.delayed_class_method
+          'world'
+        end
+      end
+
+      called = false
+      DeprecateSoft.before_hook = ->(*) { called = true }
+
+      expect(klass.delayed_class_method).to eq('world')
+      expect(called).to be true
     end
   end
 

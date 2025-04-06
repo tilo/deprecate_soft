@@ -204,7 +204,7 @@ RSpec.describe DeprecateSoft do
           'hi'
         end
 
-        extend DeprecateSoft::ClassMethods
+        include DeprecateSoft::ClassMethods
       end
 
       allow(DeprecateSoft::MethodWrapper).to receive(:wrap_method).and_call_original
