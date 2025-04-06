@@ -1,6 +1,6 @@
 
 # DeprecateSoft
-
+![Gem Version](https://img.shields.io/gem/v/deprecate_soft)
 [![Gem Version](https://badge.fury.io/rb/deprecate_soft.svg)](https://badge.fury.io/rb/deprecate_soft)
 [![CI](https://github.com/tilo/deprecate_soft/actions/workflows/main.yml/badge.svg)](https://github.com/tilo/deprecate_soft/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/tilo/deprecate_soft/branch/main/graph/badge.svg)](https://codecov.io/gh/tilo/deprecate_soft)
